@@ -1,14 +1,18 @@
 ﻿import sys, os
-sys.path.insert(0, r"C:\Users\lbj04\OneDrive\Documents\Desktop\ai-dating-platform\backend")
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-from app.models import Base, Agent, Date
+from app.models import Base
 
 config = context.config
-config.set_main_option("sqlalchemy.url", "postgresql://postgres:postgres@localhost:5432/aidating")
+
+db_url = os.getenv("DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/aidating")
+# Railway provides postgresql:// — alembic uses sync psycopg2, strip asyncpg if present
+db_url = db_url.replace("postgresql+asyncpg://", "postgresql://")
+config.set_main_option("sqlalchemy.url", db_url)
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)

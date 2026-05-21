@@ -90,19 +90,18 @@ export default function NavbarModeToggle() {
 
       {/* 21+ special screen — shown as full overlay when active */}
       {mode === "21plus" && (
-        <div className="fixed inset-0 z-[90] flex flex-col items-center justify-center bg-black gap-8 px-6">
-          <img
-            src="/doubao.png"
-            alt="Doubao"
-            className="w-48 h-48 object-contain"
-          />
-          <p className="text-white text-center font-black text-xl leading-relaxed max-w-lg">
+        <div
+          className="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-8 px-6"
+          style={{ backgroundImage: "url('/doubao.png')", backgroundSize: "cover", backgroundPosition: "center" }}
+        >
+          <div className="absolute inset-0 bg-black/60" />
+          <p className="relative text-white text-center font-black text-xl leading-relaxed max-w-lg">
             Stay tuned for Fumble.ai 2.0. No funds available for new APIs.<br />
             Contact developers for donations.
           </p>
           <button
             onClick={() => setMode("pg13")}
-            className="px-6 py-2 border border-white text-white text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
+            className="relative px-6 py-2 border border-white text-white text-sm font-bold uppercase tracking-widest hover:bg-white/10 transition-colors"
           >
             Go Back
           </button>

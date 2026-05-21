@@ -15,12 +15,9 @@ depends_on = None
 
 
 def upgrade() -> None:
-    # ALTER TYPE ADD VALUE cannot run inside a transaction block in PostgreSQL
-    conn = op.get_bind()
-    conn = conn.execution_options(isolation_level="AUTOCOMMIT")
-    conn.execute(sa.text("ALTER TYPE outcomeenum ADD VALUE IF NOT EXISTS 'dating'"))
-    conn.execute(sa.text("ALTER TYPE outcomeenum ADD VALUE IF NOT EXISTS 'failed'"))
-    conn.execute(sa.text("ALTER TYPE outcomeenum ADD VALUE IF NOT EXISTS 'netflix_and_chill'"))
+    op.execute(sa.text("ALTER TYPE outcomeenum ADD VALUE IF NOT EXISTS 'dating'"))
+    op.execute(sa.text("ALTER TYPE outcomeenum ADD VALUE IF NOT EXISTS 'failed'"))
+    op.execute(sa.text("ALTER TYPE outcomeenum ADD VALUE IF NOT EXISTS 'netflix_and_chill'"))
 
 
 def downgrade() -> None:

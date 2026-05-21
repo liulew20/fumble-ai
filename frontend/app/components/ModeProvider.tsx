@@ -1,7 +1,7 @@
 "use client";
 import { createContext, useContext, useEffect, useState } from "react";
 
-type Mode = "pg13" | "adult";
+export type Mode = "pg13" | "adult" | "21plus";
 
 interface ModeContextValue {
   mode: Mode;
@@ -14,8 +14,8 @@ export function ModeProvider({ children }: { children: React.ReactNode }) {
   const [mode, setModeState] = useState<Mode>("pg13");
 
   useEffect(() => {
-    const saved = localStorage.getItem("fumble_mode");
-    if (saved === "adult") setModeState("adult");
+    const saved = localStorage.getItem("fumble_mode") as Mode | null;
+    if (saved === "adult" || saved === "21plus") setModeState(saved);
   }, []);
 
   function setMode(m: Mode) {

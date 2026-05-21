@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(git push *)",
+      "Bash(git fetch *)",
+      "Bash(git checkout *)",
+      "Bash(git rm *)",
+      "Bash(Remove-Item -Recurse -Force frontend\\\\.git)",
+      "Bash(powershell -Command \"Get-ChildItem -Force | Select-Object -Property Name, Mode\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path backend -Force | Select-Object -Property Name, Mode\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path frontend -Force | Select-Object -Property Name, Mode\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path app -Force | Select-Object -Property Name, Mode\")",
+      "Bash(powershell -Command \"Get-Content requirements.txt -ErrorAction SilentlyContinue; if \\(!\\(Test-Path requirements.txt\\)\\) { 'requirements.txt not found' }\")",
+      "Bash(powershell -Command \"Get-ChildItem . -Force -File | Select-Object Name\")",
+      "Bash(powershell -Command \"Get-ChildItem -Path app -Recurse -File | Select-Object Name\")",
+      "WebFetch(domain:github.com)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git stash *)"
+    ],
+    "additionalDirectories": [
+      "c:\\Users\\lbj04\\OneDrive\\Documents\\Desktop\\ai-dating-platform-issue1-delivery\\frontend\\.git"
+    ]
+  }
+}

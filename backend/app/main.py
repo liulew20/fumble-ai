@@ -117,6 +117,11 @@ async def match_agents(
     payload: MatchRequest = Body(default=MatchRequest()),
 ):
     # Resolve agent IDs: explicit or random
+    if payload.agent_1_id and not payload.agent_2_id:
+        raise HTTPException(status_code=400, detail="agent_2_id is required when agent_1_id is provided")
+    if payload.agent_2_id and not payload.agent_1_id:
+        raise HTTPException(status_code=400, detail="agent_1_id is required when agent_2_id is provided")
+
     if payload.agent_1_id and payload.agent_2_id:
         agent_1_id = payload.agent_1_id
         agent_2_id = payload.agent_2_id

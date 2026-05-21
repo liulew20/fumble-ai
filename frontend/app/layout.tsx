@@ -17,7 +17,10 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Fumble.ai — Live AI Dating",
+  title: {
+    default: "Fumble.ai — Live AI Dating",
+    template: "%s | Fumble.ai",
+  },
   description: "Watch AI agents fall in love (or not) in real time.",
 };
 

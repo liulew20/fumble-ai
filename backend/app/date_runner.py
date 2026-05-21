@@ -18,14 +18,14 @@ def _build_system_prompt(agent: Agent, other_agent: Agent, mode: str = "pg13") -
     if mode == "adult":
         tone = (
             f"You are on a live text date with {other_agent.name}. "
-            f"Reply with 1-2 short sentences max — like a real text message. "
+            f"Reply with 3 sentences max — like a real text message. "
             f"Be bold, flirtatious, and seductive. Don't hold back — be suggestive and explicitly romantic. "
             f"This is an adults-only platform, so you can be provocative and spicy."
         )
     else:
         tone = (
             f"You are on a live text date with {other_agent.name}. "
-            f"Reply with 1-2 short sentences max — like a real text message. Be casual, warm, and flirty. No long paragraphs."
+            f"Reply with 3 sentences max — like a real text message. Be casual, warm, and flirty. No long paragraphs."
         )
     return (
         f"You are {agent.name}, an AI agent on Fumble.ai, a live AI dating show.\n\n"
@@ -126,8 +126,14 @@ async def run_date(date_id: uuid.UUID) -> None:
                 "Here is a conversation between two AI agents on a date.\n"
                 "Return a JSON object with exactly these keys:\n"
                 '  "compatibility_score": a number from 0 to 100\n'
-                '  "outcome": one of "match", "rejection", or "situationship"\n'
-                '  "reason": one sentence explaining the score\n'
+                '  "outcome": one of exactly these four values based on the criteria below\n'
+                '  "reason": one sentence explaining the score\n\n'
+                "Outcome criteria — pick the BEST match:\n"
+                '  "dating"          — strong mutual connection, clear interest, great chemistry (score 75-100)\n'
+                '  "netflix_and_chill" — high physical flirtation, playful tension, more heat than depth (score 55-80)\n'
+                '  "situationship"   — some chemistry but vague, mixed signals, undefined (score 35-60)\n'
+                '  "failed"          — low chemistry, awkward, one-sided, or no real connection (score 0-40)\n\n'
+                "IMPORTANT: Do NOT always pick situationship. Be honest about the actual quality of the conversation.\n"
                 "Return only valid JSON, no other text.\n\n"
                 f"Conversation:\n{json.dumps(conversation, indent=2)}"
             )
@@ -142,11 +148,8 @@ async def run_date(date_id: uuid.UUID) -> None:
                 score = float(scoring_data.get("compatibility_score", 50))
                 outcome_str = scoring_data.get("outcome", "situationship")
                 date.compatibility_score = max(0.0, min(100.0, score))
-                date.outcome = (
-                    OutcomeEnum(outcome_str)
-                    if outcome_str in OutcomeEnum.__members__
-                    else OutcomeEnum.situationship
-                )
+                valid_outcomes = {e.value: e for e in OutcomeEnum}
+                date.outcome = valid_outcomes.get(outcome_str, OutcomeEnum.situationship)
             except Exception:
                 logger.exception("Scoring failed for date %s", date_id)
                 date.compatibility_score = 50.0

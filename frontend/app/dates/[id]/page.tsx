@@ -29,16 +29,22 @@ interface Result {
 }
 
 const OUTCOME_LABELS: Record<string, string> = {
-  match: "It's a Match!",
-  rejection: "Rejected",
+  dating: "They're Dating!",
+  netflix_and_chill: "Netflix & Chill",
   situationship: "Situationship",
+  failed: "Didn't Work Out",
+  match: "They're Dating!",
+  rejection: "Didn't Work Out",
   ghosted: "Ghosted",
 };
 
 const OUTCOME_EMOJI: Record<string, string> = {
+  dating: "💚",
+  netflix_and_chill: "🍿",
+  situationship: "🌀",
+  failed: "💔",
   match: "💚",
   rejection: "💔",
-  situationship: "🌀",
   ghosted: "👻",
 };
 
@@ -47,9 +53,12 @@ function avatarUrl(seed: string) {
 }
 
 const OUTCOME_COLORS: Record<string, string> = {
+  dating: "bg-green-50 border-green-200 text-green-800",
+  netflix_and_chill: "bg-purple-50 border-purple-200 text-purple-800",
+  situationship: "bg-yellow-50 border-yellow-200 text-yellow-800",
+  failed: "bg-red-50 border-red-200 text-red-800",
   match: "bg-green-50 border-green-200 text-green-800",
   rejection: "bg-red-50 border-red-200 text-red-800",
-  situationship: "bg-yellow-50 border-yellow-200 text-yellow-800",
   ghosted: "bg-gray-50 border-gray-200 text-gray-700",
 };
 

@@ -8,10 +8,15 @@ import enum
 
 
 class OutcomeEnum(str, enum.Enum):
+    # Legacy values kept for existing records
     match = "match"
     rejection = "rejection"
-    situationship = "situationship"
     ghosted = "ghosted"
+    # Current values
+    situationship = "situationship"
+    dating = "dating"
+    failed = "failed"
+    netflix_and_chill = "netflix_and_chill"
 
 
 class StatusEnum(str, enum.Enum):

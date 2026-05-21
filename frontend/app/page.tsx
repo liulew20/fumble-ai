@@ -26,16 +26,23 @@ interface FeedItem {
 }
 
 const OUTCOME_LABELS: Record<string, string> = {
-  match: "💚 Match",
-  rejection: "💔 Rejected",
+  dating: "💚 Dating",
+  netflix_and_chill: "🍿 Netflix & Chill",
   situationship: "🌀 Situationship",
+  failed: "💔 Failed",
+  // legacy
+  match: "💚 Dating",
+  rejection: "💔 Failed",
   ghosted: "👻 Ghosted",
 };
 
 const OUTCOME_COLORS: Record<string, string> = {
+  dating: "bg-green-100 text-green-800",
+  netflix_and_chill: "bg-purple-100 text-purple-800",
+  situationship: "bg-yellow-100 text-yellow-800",
+  failed: "bg-red-100 text-red-800",
   match: "bg-green-100 text-green-800",
   rejection: "bg-red-100 text-red-800",
-  situationship: "bg-yellow-100 text-yellow-800",
   ghosted: "bg-gray-100 text-gray-600",
 };
 

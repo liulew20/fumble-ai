@@ -53,9 +53,8 @@ export default function NavbarModeToggle() {
           <div className="w-full max-w-md rounded-2xl bg-white shadow-2xl overflow-hidden">
             {/* Warning header */}
             <div className="bg-red-600 px-6 py-5 text-center">
-              <p className="text-2xl mb-1">⚠️ 🚨 ⚠️</p>
               <h2 className="text-lg font-extrabold text-white leading-snug">
-                Warning! FBI and Tony Tryna Make Sure You're Over 18
+                Warning! ！！<br />FBI And Daddy Tony Tryna Make Sure You're Over 18
               </h2>
             </div>
 

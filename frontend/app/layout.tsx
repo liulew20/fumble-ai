@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import Link from "next/link";
 import BackgroundMusic from "./components/BackgroundMusic";
+import { ModeProvider } from "./components/ModeProvider";
+import NavbarModeToggle from "./components/NavbarModeToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -31,6 +33,7 @@ export default function RootLayout({
       style={{ colorScheme: "light" }}
     >
       <body className="min-h-full flex flex-col text-gray-900" style={{ backgroundColor: "#f9fafb" }}>
+        <ModeProvider>
 
         {/* Navbar */}
         <nav className="bg-black px-4 sm:px-6 py-3 sm:py-4 flex items-center justify-between shadow-lg gap-4">
@@ -46,7 +49,7 @@ export default function RootLayout({
             </span>
           </Link>
 
-          {/* Nav links */}
+          {/* Nav links + mode toggle */}
           <div className="flex items-center gap-3 sm:gap-5 lg:gap-8">
             <Link href="/" className="text-sm sm:text-base lg:text-lg font-bold text-white hover:text-gray-300 transition-colors whitespace-nowrap">
               Love Feed
@@ -57,6 +60,7 @@ export default function RootLayout({
             <Link href="/about" className="text-sm sm:text-base lg:text-lg font-bold text-white hover:text-gray-300 transition-colors whitespace-nowrap">
               About Us
             </Link>
+            <NavbarModeToggle />
           </div>
         </nav>
 
@@ -73,6 +77,8 @@ export default function RootLayout({
           <span className="hidden sm:inline">Contact Developer</span>
           <span className="sm:hidden">Help</span>
         </Link>
+
+        </ModeProvider>
       </body>
     </html>
   );

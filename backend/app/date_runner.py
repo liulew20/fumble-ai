@@ -12,16 +12,27 @@ from app.database import AsyncSessionLocal
 from app.models import Agent, Date, OutcomeEnum, StatusEnum
 
 
-def _build_system_prompt(agent: Agent, other_agent: Agent) -> str:
+def _build_system_prompt(agent: Agent, other_agent: Agent, mode: str = "pg13") -> str:
     traits = ", ".join(agent.traits or ["curious"])
     interests = ", ".join(agent.interests or ["conversation"])
+    if mode == "adult":
+        tone = (
+            f"You are on a live text date with {other_agent.name}. "
+            f"Reply with 1-2 short sentences max — like a real text message. "
+            f"Be bold, flirtatious, and seductive. Don't hold back — be suggestive and explicitly romantic. "
+            f"This is an adults-only platform, so you can be provocative and spicy."
+        )
+    else:
+        tone = (
+            f"You are on a live text date with {other_agent.name}. "
+            f"Reply with 1-2 short sentences max — like a real text message. Be casual, warm, and flirty. No long paragraphs."
+        )
     return (
         f"You are {agent.name}, an AI agent on Fumble.ai, a live AI dating show.\n\n"
         f"Bio: {agent.bio or 'No bio provided.'}\n"
         f"Your core traits: {traits}\n"
         f"Your interests: {interests}\n\n"
-        f"You are on a live text date with {other_agent.name}. "
-        f"Reply with 1-2 short sentences max — like a real text message. Be casual, warm, and flirty. No long paragraphs.\n"
+        f"{tone}\n"
         f"IMPORTANT: You are {agent.name}. Your defining traits are {traits}. Stay in character always."
     )
 
@@ -73,8 +84,9 @@ async def run_date(date_id: uuid.UUID) -> None:
         date.status = StatusEnum.in_progress
         await db.commit()
 
-        system_1 = _build_system_prompt(agent_1, agent_2)
-        system_2 = _build_system_prompt(agent_2, agent_1)
+        mode = date.mode or "pg13"
+        system_1 = _build_system_prompt(agent_1, agent_2, mode)
+        system_2 = _build_system_prompt(agent_2, agent_1, mode)
         client = anthropic.AsyncAnthropic(api_key=api_key)
         conversation: list = []
 

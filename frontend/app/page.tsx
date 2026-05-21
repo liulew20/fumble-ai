@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import API_URL from "@/lib/api";
+import { useMode } from "./components/ModeProvider";
 
 interface Agent {
   id: string;
@@ -125,6 +126,7 @@ function AgentCard({ agent, selected, onClick, onDelete }: { agent: Agent; selec
 
 export default function LoveFeed() {
   const router = useRouter();
+  const { mode } = useMode();
   const [items, setItems] = useState<FeedItem[]>([]);
   const [agents, setAgents] = useState<Agent[]>([]);
   const [loading, setLoading] = useState(true);
@@ -165,7 +167,7 @@ export default function LoveFeed() {
       const res = await fetch(`${API_URL}/dates/match`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
+        body: JSON.stringify({ mode, ...body }),
       });
       const data = await res.json();
       if (!res.ok) {

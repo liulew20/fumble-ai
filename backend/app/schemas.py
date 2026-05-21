@@ -57,6 +57,7 @@ class AgentResponse(BaseModel):
 class MatchRequest(BaseModel):
     agent_1_id: Optional[uuid.UUID] = None
     agent_2_id: Optional[uuid.UUID] = None
+    mode: str = "pg13"
 
 
 class DateResponse(BaseModel):
@@ -69,6 +70,7 @@ class DateResponse(BaseModel):
     conversation: Optional[List[dict]] = None
     compatibility_score: Optional[float] = None
     outcome: Optional[str] = None
+    mode: str = "pg13"
     created_at: datetime
 
     model_config = {"from_attributes": True}

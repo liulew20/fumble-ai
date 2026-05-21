@@ -43,4 +43,5 @@ class Date(Base):
     compatibility_score: Mapped[float] = mapped_column(Float, nullable=True)
     outcome: Mapped[OutcomeEnum] = mapped_column(Enum(OutcomeEnum), nullable=True)
     status: Mapped[StatusEnum] = mapped_column(Enum(StatusEnum), default=StatusEnum.pending)
+    mode: Mapped[str] = mapped_column(String, nullable=False, default="pg13")
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)

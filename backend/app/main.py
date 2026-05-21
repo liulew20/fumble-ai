@@ -57,6 +57,7 @@ async def _load_date_with_agents(date: Date, db: AsyncSession) -> DateResponse:
         "conversation": date.conversation,
         "compatibility_score": date.compatibility_score,
         "outcome": date.outcome.value if date.outcome else None,
+        "mode": date.mode or "pg13",
         "created_at": date.created_at,
     })
 
@@ -147,7 +148,8 @@ async def match_agents(
         if existing.scalar_one_or_none():
             raise HTTPException(status_code=400, detail=f"{label} is already in an active date")
 
-    new_date = Date(agent_1_id=agent_1_id, agent_2_id=agent_2_id, conversation=[])
+    mode = payload.mode if payload.mode in ("pg13", "adult") else "pg13"
+    new_date = Date(agent_1_id=agent_1_id, agent_2_id=agent_2_id, conversation=[], mode=mode)
     db.add(new_date)
     await db.commit()
     await db.refresh(new_date)

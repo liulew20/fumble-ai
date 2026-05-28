@@ -8,7 +8,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse, StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, or_, func
+from sqlalchemy import select, or_, func, delete as sql_delete
 
 # Keeps task references alive until they complete so the GC doesn't cancel them
 _running_tasks: set[asyncio.Task] = set()
@@ -29,7 +29,7 @@ app.add_middleware(
     ],
     allow_origin_regex=r"https://.*\.(vercel\.app|netlify\.app)",
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )
 
@@ -64,7 +64,12 @@ async def _load_date_with_agents(date: Date, db: AsyncSession) -> DateResponse:
 
 @app.get("/health")
 async def health_check():
-    return {"status": "ok"}
+    return {"status": "ok", "build": "v3"}
+
+
+@app.get("/version")
+async def version():
+    return {"version": "v3-with-date-delete"}
 
 
 # --- Agent routes ---
@@ -105,8 +110,15 @@ async def delete_agent(agent_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     )
     if existing.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Cannot delete an agent that is in an active date")
-    await db.delete(agent)
-    await db.commit()
+    try:
+        await db.execute(
+            sql_delete(Date).where(or_(Date.agent_1_id == agent_id, Date.agent_2_id == agent_id))
+        )
+        await db.execute(sql_delete(Agent).where(Agent.id == agent_id))
+        await db.commit()
+    except Exception as exc:
+        await db.rollback()
+        raise HTTPException(status_code=500, detail=str(exc))
 
 
 # --- Date routes ---
@@ -173,6 +185,18 @@ async def get_date(date_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
     if not date:
         raise HTTPException(status_code=404, detail="Date not found")
     return await _load_date_with_agents(date, db)
+
+
+@app.delete("/dates/{date_id}", status_code=204)
+async def delete_date(date_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    result = await db.execute(select(Date).where(Date.id == date_id))
+    date = result.scalar_one_or_none()
+    if not date:
+        raise HTTPException(status_code=404, detail="Date not found")
+    if date.status in (StatusEnum.pending, StatusEnum.in_progress):
+        raise HTTPException(status_code=400, detail="Cannot delete an active date")
+    await db.execute(sql_delete(Date).where(Date.id == date_id))
+    await db.commit()
 
 
 @app.get("/dates/{date_id}/stream")

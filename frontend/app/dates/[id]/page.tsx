@@ -1,6 +1,6 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import API_URL from "@/lib/api";
 
@@ -77,6 +77,7 @@ function TypingIndicator({ name }: { name: string }) {
 
 export default function DateRoom() {
   const params = useParams();
+  const router = useRouter();
   const dateId = params.id as string;
 
   const [date, setDate] = useState<DateData | null>(null);
@@ -86,7 +87,26 @@ export default function DateRoom() {
   const [notFound, setNotFound] = useState(false);
   const [typing, setTyping] = useState(false);
   const [done, setDone] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  async function handleDelete() {
+    if (!confirm("确定要删除这条对话记录吗？")) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`${API_URL}/dates/${dateId}`, { method: "DELETE" });
+      if (res.ok || res.status === 204) {
+        router.push("/");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        alert(data.detail ?? "删除失败");
+        setDeleting(false);
+      }
+    } catch {
+      alert("无法连接到后端");
+      setDeleting(false);
+    }
+  }
 
   // Load initial date metadata
   useEffect(() => {
@@ -260,9 +280,20 @@ export default function DateRoom() {
         </div>
       )}
 
-      <Link href="/" className="text-xs text-gray-400 hover:text-gray-700 transition-colors text-center">
-        ← Back to Love Feed
-      </Link>
+      <div className="flex items-center justify-between">
+        <Link href="/" className="text-xs text-gray-400 hover:text-gray-700 transition-colors">
+          ← Back to Love Feed
+        </Link>
+        {done && (
+          <button
+            onClick={handleDelete}
+            disabled={deleting}
+            className="text-xs text-red-400 hover:text-red-600 transition-colors disabled:opacity-50"
+          >
+            {deleting ? "删除中…" : "删除对话"}
+          </button>
+        )}
+      </div>
     </div>
   );
 }

@@ -200,6 +200,21 @@ export default function LoveFeed() {
     setPick1(agentId); setPick2("");
   }
 
+  async function deleteDate(dateId: string) {
+    if (!confirm("确定要删除这条对话记录吗？")) return;
+    try {
+      const res = await fetch(`${API_URL}/dates/${dateId}`, { method: "DELETE" });
+      if (res.ok || res.status === 204) {
+        await fetchFeed();
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setError(data.detail ?? "删除失败");
+      }
+    } catch {
+      setError("无法连接到后端");
+    }
+  }
+
   async function deleteAgent(agentId: string) {
     if (!confirm("确定要删除这个 Agent 吗？")) return;
     try {
@@ -392,7 +407,7 @@ export default function LoveFeed() {
       ) : (
         <ul className="flex flex-col gap-3">
           {items.map((item) => (
-            <li key={item.id}>
+            <li key={item.id} className="relative group/feed">
               <Link
                 href={`/dates/${item.id}`}
                 className="block rounded-xl border bg-white p-4 hover:shadow-md hover:border-gray-300 transition-all"
@@ -438,6 +453,16 @@ export default function LoveFeed() {
                   </div>
                 </div>
               </Link>
+              {item.status !== "in_progress" && item.status !== "pending" && (
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); deleteDate(item.id); }}
+                  className="absolute -top-1.5 -right-1.5 hidden group-hover/feed:flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-[10px] font-bold leading-none shadow hover:bg-red-600 transition-colors"
+                  title="删除对话"
+                >
+                  ×
+                </button>
+              )}
             </li>
           ))}
         </ul>

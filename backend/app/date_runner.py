@@ -123,18 +123,20 @@ async def run_date(date_id: uuid.UUID) -> None:
 
             # Score the conversation
             scoring_prompt = (
-                "Here is a conversation between two AI agents on a date.\n"
-                "Return a JSON object with exactly these keys:\n"
-                '  "compatibility_score": a number from 0 to 100\n'
-                '  "outcome": one of exactly these four values based on the criteria below\n'
-                '  "reason": one sentence explaining the score\n\n'
-                "Outcome criteria — pick the BEST match:\n"
-                '  "dating"          — strong mutual connection, clear interest, great chemistry (score 75-100)\n'
-                '  "netflix_and_chill" — high physical flirtation, playful tension, more heat than depth (score 55-80)\n'
-                '  "situationship"   — some chemistry but vague, mixed signals, undefined (score 35-60)\n'
-                '  "failed"          — low chemistry, awkward, one-sided, or no real connection (score 0-40)\n\n'
-                "IMPORTANT: Do NOT always pick situationship. Be honest about the actual quality of the conversation.\n"
-                "Return only valid JSON, no other text.\n\n"
+                "You are judging a date between two AI agents. Read the conversation carefully.\n"
+                "Return ONLY a valid JSON object with exactly these keys (no markdown, no extra text):\n"
+                '  "compatibility_score": integer 0-100\n'
+                '  "outcome": exactly one of: "dating", "netflix_and_chill", "situationship", "failed"\n'
+                '  "reason": one sentence\n\n'
+                "Score ranges (non-overlapping, pick the one that fits best):\n"
+                '  80-100 → "dating"            (strong mutual interest, clear romantic chemistry)\n'
+                '  60-79  → "netflix_and_chill" (flirty and fun, more physical heat than emotional depth)\n'
+                '  35-59  → "situationship"     (some chemistry but vague or mixed signals)\n'
+                '  0-34   → "failed"            (awkward, one-sided, or no real connection)\n\n'
+                "RULES:\n"
+                "- Score first, then derive outcome from the range above. Do NOT default to situationship.\n"
+                "- If both agents are engaged and flirty, score should be 60+.\n"
+                "- Output only the JSON object, nothing else.\n\n"
                 f"Conversation:\n{json.dumps(conversation, indent=2)}"
             )
             try:
@@ -144,12 +146,29 @@ async def run_date(date_id: uuid.UUID) -> None:
                     messages=[{"role": "user", "content": scoring_prompt}],
                 )
                 raw = scoring_response.content[0].text.strip()
+                # Strip markdown code fences if present
+                if raw.startswith("```"):
+                    raw = raw.split("```")[1]
+                    if raw.startswith("json"):
+                        raw = raw[4:]
+                    raw = raw.strip()
                 scoring_data = json.loads(raw)
                 score = float(scoring_data.get("compatibility_score", 50))
-                outcome_str = scoring_data.get("outcome", "situationship")
-                date.compatibility_score = max(0.0, min(100.0, score))
+                score = max(0.0, min(100.0, score))
+                date.compatibility_score = score
+                # Use score to enforce outcome if model drifts
+                outcome_str = scoring_data.get("outcome", "")
                 valid_outcomes = {e.value: e for e in OutcomeEnum}
-                date.outcome = valid_outcomes.get(outcome_str, OutcomeEnum.situationship)
+                if outcome_str in valid_outcomes:
+                    date.outcome = valid_outcomes[outcome_str]
+                elif score >= 80:
+                    date.outcome = OutcomeEnum.dating
+                elif score >= 60:
+                    date.outcome = OutcomeEnum.netflix_and_chill
+                elif score >= 35:
+                    date.outcome = OutcomeEnum.situationship
+                else:
+                    date.outcome = OutcomeEnum.failed
             except Exception:
                 logger.exception("Scoring failed for date %s", date_id)
                 date.compatibility_score = 50.0
